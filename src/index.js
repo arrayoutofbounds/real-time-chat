@@ -16,10 +16,16 @@ app.use(express.static(publicDirectoryPath));
 io.on("connection", (socket) => {
     console.log("new web socket connection");
 
-    socket.emit("message", "Welcome");
+    socket.emit("message", "Welcome"); // emit to just this connection
+    socket.broadcast.emit("message", "A new user has joined"); //send to all except this socket (user)
 
     socket.on("sendMessage", (message) => {
         io.emit('message', message); // emits to all connection
+    });
+
+    // use this for when a socket gets disconnected
+    socket.on('disconnect', () => {
+        io.emit("message", "A user has left"); // the prev user has left so no need for broadcast.
     });
 });
  
