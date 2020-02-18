@@ -19,8 +19,10 @@ io.on("connection", (socket) => {
     socket.emit("message", "Welcome"); // emit to just this connection
     socket.broadcast.emit("message", "A new user has joined"); //send to all except this socket (user)
 
-    socket.on("sendMessage", (message) => {
+    socket.on("sendMessage", (message, callback) => {
         io.emit('message', message); // emits to all connection
+
+        callback("Delivered");
     });
 
     socket.on("sendLocation", (location) => {
