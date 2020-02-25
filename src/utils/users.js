@@ -43,3 +43,30 @@ const removeUser = (id) => {
          }
      }
 }
+
+const getUser = (id) => {
+    // check for existing user
+    const existingUser = users.find((user) => user.id === id);
+    if(existingUser){
+       return existingUser;
+    } else {
+        return undefined;
+    }
+}
+
+const getUsersInRoom = (room) => {
+    room = room.trim().toLowerCase();
+    const usersInRoom = users.filter((user) => user.room === room);
+    if(usersInRoom.length > 0){
+        return usersInRoom;
+    }else{
+        return [];
+    }
+}
+
+module.exports = {
+    addUser,
+    removeUser,
+    getUser,
+    getUsersInRoom
+}
