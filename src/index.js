@@ -33,26 +33,32 @@ io.on("connection", (socket) => {
         socket.join(user.room); // join a given chatroom
 
         // more specific emit events where it sends to people only in the room
-        socket.emit("message", generateMessage("Welcome!"));
-        socket.broadcast.to(user.room).emit("message", generateMessage(`${user.username} has joined.`));
+        socket.emit("message", generateMessage("Admin", "Welcome!"));
+        socket.broadcast.to(user.room).emit("message", generateMessage("Admin", `${user.username} has joined.`));
+        io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        });
 
         callback(); // letting client know that the joining was successfull without an error
     });
 
     socket.on("sendMessage", (message, callback) => {
+        const user = getUser(socket.id);
         const filter = new Filter();
 
         if(filter.isProfane(message)){
             return callback("Profanity is not allowed.");
         }
 
-        io.to("24").emit('message', generateMessage(message)); // emits to all connection
+        io.to(user.room).emit('message', generateMessage(user.username, message)); // emits to all connection
         //io.emit('message', generateMessage(message)); // emits to all connection
         callback();
     });
 
     socket.on("sendLocation", (location, callback) => {
-        io.emit('locationMessage', generateLocationMessage(`https://google.com/maps?q=${location.latitude},${location.longtitude}`));
+        const user = getUser(socket.id);
+        io.to(user.room).emit('locationMessage', generateLocationMessage(user.username, `https://google.com/maps?q=${location.latitude},${location.longtitude}`));
         callback();
     });
 
@@ -61,7 +67,11 @@ io.on("connection", (socket) => {
         const user = removeUser(socket.id);
 
         if(user){
-            io.to(user.room).emit("message", generateMessage(`${user.username} has left.`)); // the prev user has left so no need for broadcast.
+            io.to(user.room).emit("message", generateMessage("Admin", `${user.username} has left.`)); // the prev user has left so no need for broadcast.
+            io.to(user.room).emit('roomData', {
+                room: user.room,
+                users: getUsersInRoom(user.room)
+            });
         }
     });
 });
